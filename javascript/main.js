@@ -1,18 +1,40 @@
+// main.js
+/*
+  Exports a function that takes in a path of a picture and returns true if
+  there are hands, given HAAR-like features.
+*/
+
+// OpenCV
 var cv = require('opencv');
 
-cv.readImage("../images/handback.jpg", function(err, im){
-  if (err) throw err;
-  if (im.width() < 1 || im.height() < 1) throw new Error('Image has no size');
-
-  im.detectObject("../classifiers/palm.xml", {}, function(err, hands){
+/**
+  Main exported function
+  @param {String} relative_img_path - Relative image path to check for hands.
+  (From this file)
+  @param {Function} hands_callback - Callback called when hands are detected
+  @param {Function} no_hands_callback - Callback called when no hands are
+    detected
+*/
+module.exports = function(relative_img_path, hands_callback, no_hands_callback){
+  // Read the image in opencv
+  cv.readImage(relative_img_path, function(err, im){
     if (err) throw err;
 
-    for (var i = 0; i < hands.length; i++){
-      var hand = hands[i];
-      im.ellipse(hand.x + hand.width / 2, hand.y + hand.height / 2, hand.width / 2, hand.height / 2);
-    }
+    // check the size of the image, throw error is image has no size
+    if (im.width() < 1 || im.height() < 1) throw new Error('Image has no size');
 
-    im.save('./tmp/hand-detection.png');
-    console.log('Image saved to ./tmp/hand-detection.png');
+    // Perform the cascade using the classfier
+    // HARDCODED.
+    im.detectObject("../classifiers/palm.xml", {}, function(err, hands){
+      if (err) throw err;
+      // Done, check if there are any hands and call the correct callback.
+      // There are hands, call hands_callback
+      if (hands.length){
+        hands_callback();
+      } else {
+        // No hands, call no hands_callback
+        no_hands_callback();
+      }
+    });
   });
-});
+};
