@@ -6,6 +6,7 @@
 
 // OpenCV
 var cv = require('opencv');
+var color = [0, 255, 0];
 
 /**
   Main exported function
@@ -21,15 +22,24 @@ module.exports = function(relative_img_path, hands_callback, no_hands_callback){
     if (err) throw err;
 
     // check the size of the image, throw error is image has no size
-    if (im.width() < 1 || im.height() < 1) throw new Error('Image has no size');
+    if (im.width() < 1 || im.height() < 1) {
+      throw new Error('Image has no size : ' + relative_img_path);
+    }
 
     // Perform the cascade using the classfier
     // HARDCODED.
-    im.detectObject("../classifiers/palm.xml", {}, function(err, hands){
+    im.detectObject("../classifiers/palm.xml", {neighbors: 6, scale: 1.1},
+    function(err, hands){
       if (err) throw err;
       // Done, check if there are any hands and call the correct callback.
       // There are hands, call hands_callback
       if (hands.length){
+        for( var i = 0; i < hands.length; i++){
+          var hand = hands[i];
+          im.rectangle([hand.x, hand.y],
+            [hand.x + hand.width, hand.y + hand.height], color, 2);
+        }
+        im.save(relative_img_path.replace(/.jpg/, '-processed.jpg'));
         hands_callback();
       } else {
         // No hands, call no hands_callback
