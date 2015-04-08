@@ -34,12 +34,6 @@ module.exports = function(relative_img_path, hands_callback, no_hands_callback){
       // Done, check if there are any hands and call the correct callback.
       // There are hands, call hands_callback
       if (hands.length){
-        for( var i = 0; i < hands.length; i++){
-          var hand = hands[i];
-          im.rectangle([hand.x, hand.y],
-            [hand.x + hand.width, hand.y + hand.height], color, 2);
-        }
-        im.save(relative_img_path.replace(/.jpg/, '-processed.jpg'));
         hands_callback();
       } else {
         // No hands, call no hands_callback
